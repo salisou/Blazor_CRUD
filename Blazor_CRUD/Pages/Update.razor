@@ -1,0 +1,45 @@
+﻿@page "/update/{id:int}"
+@using Blazor_CRUD.Data
+
+<h1>Update post "@_postToUpdate.Title"</h1>
+
+<EditForm Model="_postToUpdate" OnValidSubmit="UpdatePost">
+    <div class="form-group mb-3">
+        <label for="postTitle">Title</label>
+        <input @bind-value="_postToUpdate.Title" class="form-control" id="postTitle" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="postContent">Content</label>
+        <input @bind-value="_postToUpdate.Content" class="form-control" id="postContent" />
+    </div>
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button class="btn btn-success" type="submit">Save</button>
+    <button @onclick="@(()=> NavigationManager.NavigateTo("/"))" class="btn btn-secondary" type="submit">Cancel</button>
+</EditForm>
+
+@code
+{
+    [Inject] AppDbContext AppDbContext { get; set; } 
+    [Inject] NavigationManager NavigationManager { get; set; }
+    [Parameter] public int id { get; set; }
+
+
+    public Post _postToUpdate = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _postToUpdate = await AppDbContext.Posts.FindAsync(id);
+    }
+
+    private async Task UpdatePost()
+    {
+         AppDbContext.Posts.Update(_postToUpdate);
+        await AppDbContext.SaveChangesAsync();
+
+        NavigationManager.NavigateTo("/");
+    }
+}
